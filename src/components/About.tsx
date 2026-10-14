@@ -54,7 +54,7 @@ const About: React.FC = () => {
           <p className="about__quote-text">
             Good photography is not just how it looks, but how it makes you feel.
           </p>
-          <span className="about__quote-author">— ARYOT</span>
+          <span className="about__quote-author">— ARYO TINTO</span>
         </div>
       </div>
     </section>

@@ -19,8 +19,7 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`} id="navbar">
-      <div className="navbar__brand" onClick={() => handleNavClick('#home')}>
-      </div>
+      <div className="navbar__brand" />
 
       <button
         className={`navbar__hamburger ${menuOpen ? 'navbar__hamburger--open' : ''}`}

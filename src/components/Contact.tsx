@@ -3,17 +3,55 @@ import React, { useState } from 'react';
 const Contact: React.FC = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent): void => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    // You can integrate EmailJS or any backend here
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 4000);
-    setForm({ name: '', email: '', message: '' });
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/aryotinton@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          _subject: `Pesan Baru dari Portfolio: ${form.name}`,
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && (data.success === 'true' || data.success === true)) {
+        setSubmitted(true);
+        setForm({ name: '', email: '', message: '' });
+        setTimeout(() => setSubmitted(false), 6000);
+      } else if (data.message && data.message.includes('Activation')) {
+        // Activation email sent on first usage
+        setSubmitted(true);
+        setForm({ name: '', email: '', message: '' });
+        setTimeout(() => setSubmitted(false), 10000);
+      } else {
+        throw new Error(data.message || 'Gagal mengirim pesan.');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gagal mengirim pesan. Silakan coba lagi.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const CONTACT_INFO = [
@@ -59,7 +97,7 @@ const Contact: React.FC = () => {
             </div>
 
             <div className="contact__socials">
-              <a href="https://instagram.com/aryot" target="_blank" rel="noopener noreferrer" className="contact__social-btn" id="social-instagram">
+              <a href="https://instagram.com/aryotinto?cplk=ZnJqbmp2eXdlMjd2&utm_source=qr" target="_blank" rel="noopener noreferrer" className="contact__social-btn" id="social-instagram">
                 Instagram
               </a>
             </div>
@@ -70,6 +108,11 @@ const Contact: React.FC = () => {
             {submitted && (
               <div className="contact__success">
                 ✓ Pesan terkirim! Saya akan segera menghubungi Anda.
+              </div>
+            )}
+            {error && (
+              <div className="contact__error">
+                ✗ {error}
               </div>
             )}
             <div className="contact__field">
@@ -113,8 +156,13 @@ const Contact: React.FC = () => {
                 required
               />
             </div>
-            <button type="submit" className="btn btn--primary contact__submit" id="contact-submit">
-              Kirim Pesan →
+            <button
+              type="submit"
+              className="btn btn--primary contact__submit"
+              id="contact-submit"
+              disabled={loading}
+            >
+              {loading ? 'Mengirim...' : 'Kirim Pesan →'}
             </button>
           </form>
         </div>
